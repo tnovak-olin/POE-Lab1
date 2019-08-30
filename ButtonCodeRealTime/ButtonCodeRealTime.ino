@@ -22,9 +22,25 @@
   http://www.arduino.cc/en/Tutorial/Blink
 */
 
-// variables will change:
-int buttonState = 0;         // variable for reading the pushbutton status
-int ledState = 0;
+//MARK: variables and constants
+
+//variable for reading the button status
+short int buttonState = 0;
+short int buttonPreviousState = LOW;
+//variable for storing the current state of the program
+int programState = 0;
+//variables for storing the current state of the LEDs
+short int ledState[] = {0, 0, 0};
+//a variable which stores the inverse value of the current value (not updated continuously)
+short int inverseState = 1;
+//MARK: variables for time calcualtions
+//the current time
+unsigned long currentTime = 0;
+//the time that the blink program was last run
+unsigned long timeLastRun = 0;
+//the blinking period
+const short int interval = 100;
+
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -44,65 +60,74 @@ void loop() {
   Serial.print("button: ");
   Serial.println(buttonState);
   Serial.print ("LED: ");
-  Serial.println(ledState);
+  Serial.println(programState);
   //MARK: Sense
+  //update the current time
+  currentTime = millis();
   // read the state of the pushbutton value:
   buttonState = digitalRead(2);
 
   //MARK: Think
   //Change state
-  switch (ledState) {
+  switch (programState) {
     case 0 :
       Serial.println("running case 0");
-      //all on
-      //turn on leds
-      digitalWrite(13, HIGH);
-      digitalWrite(11, HIGH);
-      digitalWrite(12, HIGH);
+      //update the state to turn all the LEDs on
+      for (short int i = 0; i < 3; i++) ledState[i] = 1;
       break;
     case 1 :
       Serial.println("running case 1");
-      //all off
-      //turn off leds
-      digitalWrite(13, LOW);
-      digitalWrite(11, LOW);
-      digitalWrite(12, LOW);
+      //update the state to turn all the LEDs off
+      for (short int i = 0; i < 3; i++) ledState[i] = 0;
       break;
     case 2 :
-      Serial.println("running case 2");
-      //all blinking
-      //leds on
-      digitalWrite(13, HIGH);
-      digitalWrite(11, HIGH);
-      digitalWrite(12, HIGH);
-      //wait
-      delay(1000);
-      //leds off
-      digitalWrite(13, LOW);
-      digitalWrite(11, LOW);
-      digitalWrite(12, LOW);
-      //wait
-      delay(1000);
+      if (currentTime - timeLastRun > interval) {
+        Serial.println("running case 2");
+        //finds the current state of the lights
+
+        //find the inverse of the first light's state
+        if (ledState[0] == 0 ){
+          
+          inverseState = 1;
+        }else{
+          
+          inverseState = 0;
+        }
+        //set all of the values of the Leds to be the inverse of the first LEDs state
+        for (short int i = 0; i < 3; i++) ledState[i] = inverseState;
+      }
       break;
     default :
       Serial.println("case 3 default");
       //reset button state
-      ledState = 0;
+      programState = 0;
       break;
   }
+  //MARK: ACT
+  //update the ledstates to be the same as the stored states
+  digitalWrite(13, ledState[0]);
+  digitalWrite(11, ledState[1]);
+  digitalWrite(12, ledState[2]);
 
-  if (buttonState == HIGH) {
+  //if the button was just pressed update the program state to the next value
+  if (buttonState == HIGH && buttonPreviousState == LOW) {
     Serial.println("incremented");
-    ledState += 1;
+    programState += 1;
+    //say that the previous state of the button was pressed
+    buttonPreviousState = HIGH;
+
+    //if the button is not pressed change the previous state to be off.
+  }else if (buttonState == LOW){
+    buttonPreviousState = LOW;
   }
 
 
   /*digitalWrite(13, HIGH);
-  digitalWrite(11, HIGH);
-  digitalWrite(12, HIGH);// turn the LED on (HIGH is the voltage level)
-  delay(1000);                       // wait for a second
-  digitalWrite(13, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(12, LOW);// turn the LED off by making the voltage LOW
-  delay(1000);  */
+    digitalWrite(11, HIGH);
+    digitalWrite(12, HIGH);// turn the LED on (HIGH is the voltage level)
+    delay(1000);                       // wait for a second
+    digitalWrite(13, LOW);
+    digitalWrite(11, LOW);
+    digitalWrite(12, LOW);// turn the LED off by making the voltage LOW
+    delay(1000);  */
 }
