@@ -40,7 +40,11 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-
+  Serial.println("---------------------------------");
+  Serial.print("button: ");
+  Serial.println(buttonState);
+  Serial.print ("LED: ");
+  Serial.println(ledState);
   //MARK: Sense
   // read the state of the pushbutton value:
   buttonState = digitalRead(2);
@@ -49,18 +53,23 @@ void loop() {
   //Change state
   switch (ledState) {
     case 0 :
+      Serial.println("running case 0");
       //all on
       //turn on leds
       digitalWrite(13, HIGH);
       digitalWrite(11, HIGH);
       digitalWrite(12, HIGH);
+      break;
     case 1 :
+      Serial.println("running case 1");
       //all off
       //turn off leds
       digitalWrite(13, LOW);
       digitalWrite(11, LOW);
       digitalWrite(12, LOW);
+      break;
     case 2 :
+      Serial.println("running case 2");
       //all blinking
       //leds on
       digitalWrite(13, HIGH);
@@ -74,12 +83,16 @@ void loop() {
       digitalWrite(12, LOW);
       //wait
       delay(1000);
+      break;
     default :
+      Serial.println("case 3 default");
       //reset button state
-      buttonState = 0;
+      ledState = 0;
+      break;
   }
 
   if (buttonState == HIGH) {
+    Serial.println("incremented");
     ledState += 1;
   }
 
