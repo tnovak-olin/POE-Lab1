@@ -38,9 +38,12 @@ short int inverseState = 1;
 unsigned long currentTime = 0;
 //the time that the blink program was last run
 unsigned long timeLastRun = 0;
-//the blinking period
-const short int interval = 100;
-
+//the blinking period for the fast blinking state
+const short int fastBlinkInterval = 100;
+//the blinking period for the slow blinking state
+const short int longBlinkInterval = 1000;
+//the waiting period for updating the sequential lights
+const short int circusBlinkInterval = 200;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -56,11 +59,6 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-  Serial.println("---------------------------------");
-  Serial.print("button: ");
-  Serial.println(buttonState);
-  Serial.print ("LED: ");
-  Serial.println(programState);
   //MARK: Sense
   //update the current time
   currentTime = millis();
@@ -71,30 +69,74 @@ void loop() {
   //Change state
   switch (programState) {
     case 0 :
-      Serial.println("running case 0");
       //update the state to turn all the LEDs on
       for (short int i = 0; i < 3; i++) ledState[i] = 1;
       break;
     case 1 :
-      Serial.println("running case 1");
       //update the state to turn all the LEDs off
       for (short int i = 0; i < 3; i++) ledState[i] = 0;
       break;
     case 2 :
-      if (currentTime - timeLastRun > interval) {
-        Serial.println("running case 2");
+      //applies the desired interval
+      if (currentTime - timeLastRun > fastBlinkInterval) {
         //finds the current state of the lights
 
         //find the inverse of the first light's state
-        if (ledState[0] == 0 ){
-          
+        if (ledState[0] == 0 ) {
+
           inverseState = 1;
-        }else{
-          
+        } else {
+
           inverseState = 0;
         }
         //set all of the values of the Leds to be the inverse of the first LEDs state
         for (short int i = 0; i < 3; i++) ledState[i] = inverseState;
+
+        //update the time last run for the blinking programs
+        timeLastRun = currentTime;
+      }
+      break;
+    case 3 :
+      //Applies the desired interval
+      if (currentTime - timeLastRun > longBlinkInterval) {
+        //finds the current state of the lights
+
+        //find the inverse of the first light's state
+        if (ledState[0] == 0 ) {
+
+          inverseState = 1;
+        } else {
+
+          inverseState = 0;
+        }
+        //set all of the values of the Leds to be the inverse of the first LEDs state
+        for (short int i = 0; i < 3; i++) ledState[i] = inverseState;
+
+        //update the time last run for the blinking programs
+        timeLastRun = currentTime;
+      }
+      break;
+    case 4:
+      //applies the desired interval
+      if (currentTime - timeLastRun > circusBlinkInterval) {
+
+        //finds the current state of the lights
+        for (short int i = 0; i < 3; i++) {
+          //if the current light is on
+          if (ledState[i] == 1) {
+            //turns itself off
+            ledState[i] = 0;
+            //turns next in line on
+            ledState[(i + 1) % 3] = 1;
+            break;
+
+            //if all the lights are off
+          } else if (i == 2 && ledState[i] == 0 ) {
+            //turn on the first light
+            ledState[0] = 1;
+          }
+        }
+        timeLastRun = currentTime;
       }
       break;
     default :
@@ -106,8 +148,8 @@ void loop() {
   //MARK: ACT
   //update the ledstates to be the same as the stored states
   digitalWrite(13, ledState[0]);
-  digitalWrite(11, ledState[1]);
-  digitalWrite(12, ledState[2]);
+  digitalWrite(12, ledState[1]);
+  digitalWrite(11, ledState[2]);
 
   //if the button was just pressed update the program state to the next value
   if (buttonState == HIGH && buttonPreviousState == LOW) {
@@ -117,17 +159,7 @@ void loop() {
     buttonPreviousState = HIGH;
 
     //if the button is not pressed change the previous state to be off.
-  }else if (buttonState == LOW){
+  } else if (buttonState == LOW) {
     buttonPreviousState = LOW;
   }
-
-
-  /*digitalWrite(13, HIGH);
-    digitalWrite(11, HIGH);
-    digitalWrite(12, HIGH);// turn the LED on (HIGH is the voltage level)
-    delay(1000);                       // wait for a second
-    digitalWrite(13, LOW);
-    digitalWrite(11, LOW);
-    digitalWrite(12, LOW);// turn the LED off by making the voltage LOW
-    delay(1000);  */
 }
