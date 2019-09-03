@@ -44,6 +44,10 @@ const short int fastBlinkInterval = 100;
 const short int longBlinkInterval = 1000;
 //the waiting period for updating the sequential lights
 const short int circusBlinkInterval = 200;
+// the waiting period for screaming into the bike light
+const short int screamBlinkInterval = 50;
+// get the sensor value of the microphone
+int micVal = 0;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -67,6 +71,7 @@ void loop() {
 
   //MARK: Think
   //Change state
+  Serial.println(programState);
   switch (programState) {
     case 0 :
       //update the state to turn all the LEDs on
@@ -117,6 +122,31 @@ void loop() {
       }
       break;
     case 4:
+      micVal = analogRead(A0);
+      if (micVal > 0) {
+        //applies the desired interval
+        if (currentTime - timeLastRun > screamBlinkInterval) {
+          //finds the current state of the lights
+          for (short int i = 0; i < 3; i++) {
+            //if the current light is on
+            if (ledState[i] == 1) {
+              //turns itself off
+              ledState[i] = 0;
+              //turns next in line on
+              ledState[(i + 1) % 3] = 1;
+              break;
+
+              //if all the lights are off
+            } else if (i == 2 && ledState[i] == 0 ) {
+              //turn on the first light
+              ledState[0] = 1;
+            }
+          }
+          timeLastRun = currentTime;
+        }
+      }
+      break;
+    case 5:
       //applies the desired interval
       if (currentTime - timeLastRun > circusBlinkInterval) {
 
