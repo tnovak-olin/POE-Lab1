@@ -1,25 +1,15 @@
 /*
-  Blink
+  Bike Light
 
-  Turns an LED on for one second, then off for one second, repeatedly.
-
-  Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO
-  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to
-  the correct LED pin independent of which board is used.
-  If you want to know what pin the on-board LED is connected to on your Arduino
-  model, check the Technical Specs of your board at:
-  https://www.arduino.cc/en/Main/Products
-
-  modified 8 May 2014
-  by Scott Fitzgerald
-  modified 2 Sep 2016
-  by Arturo Guadalupi
-  modified 8 Sep 2016
-  by Colby Newman
-
-  This example code is in the public domain.
-
-  http://www.arduino.cc/en/Tutorial/Blink
+  This code is used to turn on three LEDs in various ways based on the state of the system. The state is determined
+  by a button that, when pressed, increments the state of the system.
+  States:
+      0 - all lights on
+      1 - all lights off
+      2 - all lights flash quickly
+      3 - all lights flash slowly
+      4 - lights turn on sequentially in response to microphone input
+      5 - lights turn on sequentially without input
 */
 
 //MARK: variables and constants
@@ -68,10 +58,12 @@ void loop() {
   currentTime = millis();
   // read the state of the pushbutton value:
   buttonState = digitalRead(2);
+  // read the state of the microphone sensor
+  micVal = analogRead(A0);
 
   //MARK: Think
   //Change state
-  Serial.println(programState);
+  Serial.print("System State: "); Serial.println(programState);
   switch (programState) {
     case 0 :
       //update the state to turn all the LEDs on
@@ -122,7 +114,6 @@ void loop() {
       }
       break;
     case 4:
-      micVal = analogRead(A0);
       if (micVal > 0) {
         //applies the desired interval
         if (currentTime - timeLastRun > screamBlinkInterval) {
@@ -170,7 +161,6 @@ void loop() {
       }
       break;
     default :
-      Serial.println("case 3 default");
       //reset button state
       programState = 0;
       break;
@@ -183,7 +173,6 @@ void loop() {
 
   //if the button was just pressed update the program state to the next value
   if (buttonState == HIGH && buttonPreviousState == LOW) {
-    Serial.println("incremented");
     programState += 1;
     //say that the previous state of the button was pressed
     buttonPreviousState = HIGH;
