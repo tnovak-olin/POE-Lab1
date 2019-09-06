@@ -175,7 +175,8 @@ void loop() {
   digitalWrite(11, ledState[2]);
 
   //if the button was just pressed update the program state to the next value
-  if (buttonState == HIGH && buttonPreviousState == LOW && currentTime - buttonPreviousTime > buttonClickInterval) {
+  if (buttonState == HIGH && buttonPreviousState == LOW
+      && currentTime - buttonPreviousTime > buttonClickInterval) {
     programState += 1;
     //say that the previous state of the button was pressed
     buttonPreviousState = HIGH;
