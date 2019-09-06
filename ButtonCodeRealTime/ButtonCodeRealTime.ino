@@ -164,7 +164,7 @@ void loop() {
       }
       break;
     default :
-      //reset button state
+      //reset the program state
       programState = 0;
       break;
   }
