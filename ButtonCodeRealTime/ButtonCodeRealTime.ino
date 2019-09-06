@@ -17,6 +17,7 @@
 //variable for reading the button status
 short int buttonState = 0;
 short int buttonPreviousState = LOW;
+unsigned long buttonPreviousTime = 0;
 //variable for storing the current state of the program
 int programState = 0;
 //variables for storing the current state of the LEDs
@@ -36,6 +37,8 @@ const short int longBlinkInterval = 1000;
 const short int circusBlinkInterval = 200;
 // the waiting period for screaming into the bike light
 const short int screamBlinkInterval = 50;
+// the waiting period for registering another button click
+const short int buttonClickInterval = 100;
 // get the sensor value of the microphone
 int micVal = 0;
 
@@ -172,10 +175,12 @@ void loop() {
   digitalWrite(11, ledState[2]);
 
   //if the button was just pressed update the program state to the next value
-  if (buttonState == HIGH && buttonPreviousState == LOW) {
+  if (buttonState == HIGH && buttonPreviousState == LOW && currentTime - buttonPreviousTime > buttonClickInterval) {
     programState += 1;
     //say that the previous state of the button was pressed
     buttonPreviousState = HIGH;
+    // save the last time a button click was registered
+    buttonPreviousTime = currentTime;
 
     //if the button is not pressed change the previous state to be off.
   } else if (buttonState == LOW) {
